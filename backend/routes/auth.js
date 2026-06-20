@@ -1,6 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
-import { protect } from "../middleware/auth.js";
+import { protect,googleprotect } from "../middleware/auth.js";
 import {createSession} from "../components/session.js";
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
@@ -85,10 +85,11 @@ router.get('/google', passport.authenticate('google', {
 // Google OAuth callback route
 
 router.get("/google/callback",
-  passport.authenticate("google", {session:false, failureRedirect: "/auth'" }),
+  passport.authenticate("google", {session:false, failureRedirect: "http://localhost:3000/auth" }),
   async(req, res) => {
-    await createSession(res, user._id.toString());
-    res.redirect('http://localhost:3000/shop');
+    await createSession(res, req.user._id.toString());
+    // console.log("user:",req.user._id)
+    res.redirect('http://localhost:3000/userinfo');
   }
 )
 
@@ -97,9 +98,24 @@ router.get('/logout', protect, async (req, res) => {
   res.clearCookie('token', { path: '/' });
   return res.json({ success: true, message: 'session is deleted' });
 });
-// GET /api/auth/me
-router.get("/me", protect, async (req, res) => {
-  res.json({ success: true, user: req.user });
+
+// backend route
+router.get("/me",googleprotect,(req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false });
+  }
+
+  res.json({
+    success: true,
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      avatar: req.user.avatar,
+      authProvider: req.user.authProvider,
+    },
+  });
 });
 
 // PUT /api/auth/profile

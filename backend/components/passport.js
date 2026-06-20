@@ -10,21 +10,19 @@ export default passport.use(new GoogleStrategy({
 },
   async function (accessToken, refreshToken, profile, cb) {
     try {
-      console.log("profile", profile);
-      // console.log('accessToken: ',accessToken);
-      // console.log('RefreshToken: ',refreshToken);
 
       // Check if user already exists
-      const user = await User.findOne({ _id: profile.id });
+      const user = await User.findOne({ googleID: profile.id });
 
       if (!user) {
         await User.create({
-          _id: profile.id,
+          googleID: profile.id,
           name: profile.displayName,
           email: profile.emails[0].value,
           avatar: profile.photos[0].value,
           role:"buyer",
           password:null,
+          authProvider: profile.provider,
         });
 
       }
@@ -37,16 +35,16 @@ export default passport.use(new GoogleStrategy({
 ));
 
 // // Serialize user for the session
-// passport.serializeUser((user, done) => {
-//   done(null, user._id);
-// });
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
 
 // // Deserialize user from the session
-// passport.deserializeUser(async (id, done) => {
-//   try {
-//     const user = await Register.findById(id);
-//     done(null, user);
-//   } catch (err) {
-//     done(err, null);
-//   }
-// });
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err, null);
+  }
+});

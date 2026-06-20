@@ -12,7 +12,7 @@ import orderRoutes from './routes/orders.js';
 import AddressRoutes from './routes/address.js';
 import imageURl from './routes/imageURl.js';
 import passport from "./components/passport.js"
-
+import session from "express-session";
 
 // ES module __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
@@ -39,6 +39,13 @@ app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/address",AddressRoutes );
 
+// express-session creates the cookie and sends it to browser.
+app.use(session({
+  secret: "secret",
+  resave: false,
+  saveUninitialized: false
+}));
+
 // Initialize Passport
 app.use(passport.initialize()); //This starts Passport and adds Passport functionality to every request.
 app.use(passport.session());
@@ -64,6 +71,8 @@ app.use((err, req, res, next) => {
     message: err.message || "Internal Server Error",
   });
 });
+
+
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

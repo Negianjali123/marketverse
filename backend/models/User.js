@@ -11,6 +11,11 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       match: [/^\S+@\S+\.\S+$/, "Please enter a valid email"],
     },
+    googleID:{
+      type:String,
+      unique: true,
+      sparse: true, 
+    },
     authProvider: {
       type: String,
       enum: ["local", "google"],
@@ -21,7 +26,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: function () {
-        return this.authProvider === "google";
+        return this.authProvider === "local";
       },
       trim: true,
     },
@@ -50,7 +55,10 @@ const userSchema = new mongoose.Schema(
 
 // Hash password before save
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.password || !this.isModified("password")) {
+    return next();
+  }
+
   const salt = await bcrypt.genSalt(12);
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -58,6 +66,9 @@ userSchema.pre("save", async function (next) {
 
 // Compare password
 userSchema.methods.matchPassword = async function (enteredPassword) {
+   if (!this.password) {
+    return false;
+  }
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
