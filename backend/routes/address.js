@@ -3,7 +3,7 @@ import Address from "../models/Address.js"
 import { protect, authorize } from "../middleware/auth.js";
 
 const router = express.Router();
-router.get("/:id", async (req, res) => {
+router.get("/:id", protect, async (req, res) => {
     const id = req.params.id;
     try {
         const HasAddress = await Address.findOne({ userid: id })
@@ -14,12 +14,13 @@ router.get("/:id", async (req, res) => {
             return res.status(200).json({ success: false, message: "donot have data" })
         }
     } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
+        console.error("Address error:", err.message);
+        res.status(500).json({ success: false, message: "Server error" });
 
     }
 
 })
-router.post("/updateaddress", async (req, res) => {
+router.post("/updateaddress", protect, async (req, res) => {
     try {
         const { userid, buildingname, areaname, pincode, city, state } = req.body;
 
@@ -44,7 +45,8 @@ router.post("/updateaddress", async (req, res) => {
         return res.status(201).json({ success: true, message: "Address created", data: newAddress });
 
     } catch (err) {
-        res.status(500).json({ success: false, message: err.message });
+        console.error("Address error:", err.message);
+        res.status(500).json({ success: false, message: "Server error" });
     }
 })
 

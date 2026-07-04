@@ -12,6 +12,7 @@ import Cart from "./pages/Cart";
 import Orders from "./pages/Orders";
 import Checkout from "./pages/Checkout";
 import SellerDashboard from "./pages/SellerDashboard";
+import Googleuserinfo from "./pages/Googleuserinfo";
 import Address from "./pages/Address";
 import "./styles/global.css";
 
@@ -34,6 +35,7 @@ function App() {
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/seller/dashboard" element={<SellerDashboard />} />
                   <Route path="/add-address" element={<Address />} />
+                  <Route path="/userinfo" element ={<Googleuserinfo/>}/>
                 </Routes>
               </main>
               <Footer />

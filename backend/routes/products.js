@@ -7,7 +7,20 @@ import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "../config/s3.js";
 import multer from "multer";
-const upload = multer({ storage: multer.memoryStorage() });
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },    // 5MB max
+  fileFilter: (req, file, cb) => {
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only JPEG, PNG, WebP, GIF images are allowed"), false);
+    }
+  },
+});
+
 const router = express.Router();
 
 async function productsWithImageUrls(products) {
@@ -61,7 +74,10 @@ router.get("/", async (req, res) => {
 
     const query = { status };
     if (category) query.category = category;
-    if (search) query.name = { $regex: search, $options: "i" };
+    if (search) {
+      const escaped = search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");  // escape regex chars
+      query.name = { $regex: escaped, $options: "i" };
+    }
     if (minPrice || maxPrice) {
       query.price = {};
       if (minPrice) query.price.$gte = Number(minPrice);
@@ -88,7 +104,8 @@ router.get("/", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 router.post("/cartImage",async(req,res)=>{
@@ -109,7 +126,9 @@ router.post("/cartImage",async(req,res)=>{
 router.get("/featured", async (req, res) => {
   try {
     const products = await Product.find({ status: "active" })
-    .populate("seller", "storeName");
+    .populate("seller", "storeName")
+    .sort("-createdAt")
+    .limit(20);
     
     const productDetails = await productsWithImageUrls(products)
     // console.log(productDetails);
@@ -118,7 +137,8 @@ router.get("/featured", async (req, res) => {
       products: productDetails,
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -133,7 +153,8 @@ router.get("/:id", async (req, res) => {
     }
     res.json({ success: true, product });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -155,7 +176,8 @@ router.post("/", protect, authorize("seller", "admin"),upload.single("image"), a
 
     res.status(201).json({ success: true, message:"data is saved" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -185,7 +207,8 @@ router.put("/:id",protect, authorize("seller", "admin"),upload.single("image"), 
     });
     res.json({ success: true, message:"product saved" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -202,7 +225,8 @@ router.delete("/:id", protect, authorize("seller", "admin"), async (req, res) =>
     await product.deleteOne();
     res.json({ success: true, message: "Product deleted" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -229,7 +253,8 @@ router.post("/:id/reviews", protect, authorize("buyer"), async (req, res) => {
     await product.save();
     res.status(201).json({ success: true, message: "Review added" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -239,18 +264,9 @@ router.get("/seller/my-products", protect, authorize("seller"), async (req, res)
     const products = await Product.find({ seller: req.user._id }).sort("-createdAt");
     res.json({ success: true, products, count: products.length });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-router.put('/update/:id', async (req, res) => {
-  const images = req.file
-  const _id = req.params.id;
-  const products = await Product.findByIdAndUpdate(
-    _id,
-    { images },
-    { new: true } // return updated document
-  );
-  console.log("fone")
-});
 export default router;

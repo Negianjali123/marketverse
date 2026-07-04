@@ -11,4 +11,7 @@ const AddressSchema =new mongoose.Schema(
     }
 )
 
+// Index for fast lookup by user
+AddressSchema.index({ userid: 1 }, { unique: true });
+
 export default mongoose.model("Address", AddressSchema);

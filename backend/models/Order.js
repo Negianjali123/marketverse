@@ -45,4 +45,9 @@ const orderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Indexes for query performance at scale
+orderSchema.index({ buyer: 1, createdAt: -1 });
+orderSchema.index({ "items.seller": 1, createdAt: -1 });
+orderSchema.index({ orderStatus: 1 });
+
 export default mongoose.model("Order", orderSchema);

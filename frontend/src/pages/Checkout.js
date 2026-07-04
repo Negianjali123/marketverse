@@ -1,16 +1,18 @@
 import { Link, useNavigate } from "react-router-dom"
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import API from "../api"
 import { useCart } from "../context/CartContext"
 import { useAddress } from "../context/AddressContext";
 
+
 const Checkout = () => {
 
     const { cart, removeFromCart, updateQuantity, clearCart, cartTotal, updateImage } = useCart();
-    const { pubaddress, editing ,userid} = useAddress();
+    const { pubaddress, editing, userid } = useAddress();
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState("");
+    const message = useRef();
     const [error, setError] = useState("");
     const images = cart.map((item) => ({ image: item.image, _id: item._id }));
     const discount = cart.comparePrice
@@ -31,9 +33,14 @@ const Checkout = () => {
         };
         fetchProducts();
     }, [])
-
+    7
     // Build order payload that matches backend Order model
     const buildOrderPayload = (paymentMethod) => {
+        if (!pubaddress) {
+            setError("Please select a shipping address.");
+            return null;
+        }
+        setError("");
         return {
             items: cart.map((item) => ({
                 product: item._id,
@@ -47,24 +54,27 @@ const Checkout = () => {
                 country: "India",
             },
             paymentMethod,
-
         };
     };
-    
+
     // ── COD Order ──
     const handleCOD = async () => {
         setLoading("cod");
         setError("");
         try {
-            const payload = buildOrderPayload("cod");
 
-            const { data } = await API.post("/orders", payload);
-            if (data.success) {
-                clearCart();
-                navigate("/", { state: { orderMsg: "Your order has been placed successfully! Payment will be collected on delivery." } });
-            } else {
-                setError(data.message || "Failed to place order");
+            const payload = buildOrderPayload("cod");
+            if (payload) {
+
+                const { data } = await API.post("/orders", payload);
+                if (data.success) {
+                    clearCart();
+                    navigate("/", { stath: { orderMsg: "Your order has been placed successfully! Payment will be collected on delivery." } });
+                } else {
+                    setError(data.message || "Failed to place order");
+                }
             }
+
         } catch (err) {
             setError(err.response?.data?.message || "Something went wrong. Please try again.");
         }
@@ -79,13 +89,24 @@ const Checkout = () => {
             <div className="checkout-page container">
                 <h1 >Review <span className="highlight">Order</span></h1>
                 {/* Items */}
+                {error && (<p style={{
+                    background: "rgba(231,76,60,0.1)",
+                    color: "#e74c3c",
+                    padding: "1rem 1.5rem",
+                    borderRadius: "10px",
+                    marginBottom: "1.5rem",
+                    fontWeight: 600,
+                    fontSize: "1.1rem",
+                    textAlign: "center",
+                    border: "1px solid rgba(46,204,113,0.3)",
+                }}>
+                    {error}</p>)}
 
+                <div ></div>
                 <div className="row">
                     <div className="col-7">
                         {cart.map((item, i) => (
-
                             <div className="row" key={item._id} style={{ animationDelay: `${i * 0.06}s` }}>
-
                                 <div className="col">
                                     <Link to={`/product/${item._id}`}>
                                         <img src={item.imageUrl} alt={item.name} loading="lazy" />

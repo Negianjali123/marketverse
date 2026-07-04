@@ -36,11 +36,12 @@ export async function createSession(res,userId) {
   // console.log(sessionToken);debugger;
  
   // Set cookie
+  const isProduction = process.env.NODE_ENV === "production";
   res.cookie('token', sessionToken, {
-    httpOnly: false,
-    secure: false, // ⚠️ Set to false for localhost/testing
+    httpOnly: true,                          // JS cannot read — prevents XSS theft
+    secure: isProduction,                    // HTTPS only in production
     expires: expiresAt,
-    sameSite: 'lax',
+    sameSite: isProduction ? 'strict' : 'lax',  // strict in prod, lax for localhost
     path: '/',
   });
  

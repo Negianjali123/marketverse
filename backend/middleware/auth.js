@@ -21,11 +21,43 @@ import { getSession } from "../components/session.js";
 //     return res.status(401).json({ success: false, message: "Token invalid or expired" });
 //   }
 // };
+const googleprotect = async (req, res, next) => {
+  try {
+    const session = await getSession(req); // Reads and verifies the session token from cookies
+    // console.log("session",session)
 
+    if (!session) {
+      return res.status(401).json({ success: false, message: 'Unauthorized: Invalid or expired session' });
+    }
+    else {
+      const user = await User.findById(session.userId)
+      if (!user) {
+        return res.status(401).json({ success: false, message: user });
+      }
+
+      // Attach user info to request
+
+     req.user = {
+        _id: session.userId,
+         name: user.name,
+        email: user.email,
+        role: user.role,
+        storeName: user.storeName,
+        avatar: user.avatar,
+
+      };
+    }
+
+
+    next();
+  } catch (err) {
+    return res.status(401).json({ success: false, message: "Token invalid or expired" });
+  }
+};
 const protect = async (req, res, next) => {
   try {
     const session = await getSession(req); // Reads and verifies the session token from cookies
-
+    // console.log("session",session)
 
     if (!session) {
       return res.status(401).json({ success: false, message: 'Unauthorized: Invalid or expired session' });
@@ -37,6 +69,7 @@ const protect = async (req, res, next) => {
       if (!user) {
         return res.status(401).json({ success: false, message: 'User not found' });
       }
+
       // Attach user info to request
 
       req.user = {
@@ -66,4 +99,4 @@ const authorize = (...roles) => {
   };
 };
 
-export { protect, authorize };
+export { protect, authorize ,googleprotect};

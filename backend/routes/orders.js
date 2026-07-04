@@ -31,7 +31,8 @@ router.post("/create-razorpay-order", protect, async (req, res) => {
     const razorpayOrder = await getRazorpay().orders.create(options);
     res.json({ success: true, order: razorpayOrder, key: process.env.RAZORPAY_KEY_ID });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -50,7 +51,8 @@ router.post("/verify-payment", protect, async (req, res) => {
     }
     res.json({ success: true, message: "Payment verified" });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -69,21 +71,21 @@ router.post("/", protect, async (req, res) => {
     let subtotal = 0;
 
     for (const item of items) {
-      const product = await Product.findByIdAndUpdate({
-        _id: item.product,
-        stock: { $gte: item.quantity }
-      }, {
-        $inc: { stock: -item.quantity } // decrease stock
-      },
-        {
-          new: true // return updated document
-        }
+      // Atomic: only decrements if stock >= quantity
+      const product = await Product.findOneAndUpdate(
+        { _id: item.product, stock: { $gte: item.quantity } },
+        { $inc: { stock: -item.quantity } },
+        { new: true }
       );
 
       if (!product) {
+        // Check if product exists at all to give a clear message
+        const exists = await Product.findById(item.product);
         return res.status(400).json({
           success: false,
-          message: `Insufficient stock for ${product.name}`,
+          message: exists
+            ? `Insufficient stock for ${exists.name}`
+            : `Product ${item.product} not found`,
         });
       }
       orderItems.push({
@@ -119,36 +121,56 @@ router.post("/", protect, async (req, res) => {
 
     res.status(201).json({ success: true, order });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// GET /api/orders/my-orders — buyer's orders
+// GET /api/orders/my-orders — buyer's orders (paginated)
 router.get("/my-orders", protect, authorize("buyer"), async (req, res) => {
   try {
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const total = await Order.countDocuments({ buyer: req.user._id });
     const orders = await Order.find({ buyer: req.user._id })
       .populate("items.product", "name images")
-      .sort("-createdAt");
-    res.json({ success: true, orders });
+      .sort("-createdAt")
+      .skip(skip)
+      .limit(Number(limit));
+
+    res.json({ success: true, orders, pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / Number(limit)) } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// GET /api/orders/seller-orders — seller sees orders with their products
+// GET /api/orders/seller-orders — seller sees orders with their products (paginated)
 router.get("/seller-orders", protect, authorize("seller"), async (req, res) => {
   try {
-    const orders = await Order.find({ "items.seller": req.user._id })
+    const { page = 1, limit = 10 } = req.query;
+    const skip = (Number(page) - 1) * Number(limit);
+    const total = await Order.countDocuments({ "items.seller": req.user._id });
+    const settorders = await Order.find({ "items.seller": req.user._id })
       .populate("buyer", "name email")
       .populate("items.product", "name images")
-      .sort("-createdAt");
-    res.json({ success: true, orders });
+      .sort("-createdAt")
+      .skip(skip)
+      .limit(Number(limit));
+
+    const orders = settorders
+      .map(order => ({
+        ...order._doc,
+        items: order.items.filter(item => item.seller.toString() === req.user._id.toString())
+      }));
+    res.json({ success: true, orders, pagination: { page: Number(page), limit: Number(limit), total, pages: Math.ceil(total / Number(limit)) } });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
-// GET /api/orders/:id
+// GET /api/orders/:id — only the buyer, the item seller, or admin can view
 router.get("/:id", protect, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id)
@@ -157,9 +179,17 @@ router.get("/:id", protect, async (req, res) => {
     if (!order) {
       return res.status(404).json({ success: false, message: "Order not found" });
     }
+    // Ownership check
+    const isBuyer = order.buyer._id.toString() === req.user._id.toString();
+    const isSeller = order.items.some(i => i.seller.toString() === req.user._id.toString());
+    const isAdmin = req.user.role === "admin";
+    if (!isBuyer && !isSeller && !isAdmin) {
+      return res.status(403).json({ success: false, message: "Not authorized to view this order" });
+    }
     res.json({ success: true, order });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -178,7 +208,8 @@ router.put("/:id/status", protect, authorize("seller", "admin"), async (req, res
     await order.save();
     res.json({ success: true, order });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

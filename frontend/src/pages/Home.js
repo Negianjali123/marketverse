@@ -2,7 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import API from "../api";
 import ProductCard from "../components/ProductCard";
+import { AuthProvider } from "../context/AuthContext";
 import "./Pages.css";
+import { useAuth } from "../context/AuthContext";
 
 const CATEGORIES = [
   { name: "Electronics", icon: "⚡", color: "#4a9dec", desc: "Gadgets & Tech" },
@@ -19,7 +21,7 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [msg, setMsg] = useState("");
   const location = useLocation();
-
+  const { user } = useAuth()
   // Show order success message when redirected from Payment
   useEffect(() => {
     if (location.state?.orderMsg) {
@@ -29,7 +31,19 @@ const Home = () => {
       setTimeout(() => setMsg(""), 5000);
     }
   }, [location.state]);
-
+  useEffect(() => {
+    const logininfo = async () => {
+      try {
+        const { data } = await API.get("/loginstatus")
+        // console.log(data);debugger;
+      } catch (err) {
+        if (err.response?.status === 401) {
+          localStorage.removeItem("user");
+        }
+      }
+    }
+    logininfo();
+  }, [])
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -42,6 +56,7 @@ const Home = () => {
     fetchProducts();
   }, []);
 
+
   return (
     <div className="home-page">
       {/* ── Hero Section ── */}
@@ -53,21 +68,21 @@ const Home = () => {
         </div>
         <div className="hero-inner container">
           <div className="hero-content">
-              {msg && (
-                    <div style={{
-                        background: "rgba(46,204,113,0.15)",
-                        color: "#1a9f55",
-                        padding: "1rem 1.5rem",
-                        borderRadius: "10px",
-                        marginBottom: "1.5rem",
-                        fontWeight: 600,
-                        fontSize: "1.1rem",
-                        textAlign: "center",
-                        border: "1px solid rgba(46,204,113,0.3)",
-                    }}>
-                        {msg}
-                    </div>
-                )}
+            {msg && (
+              <div style={{
+                background: "rgba(46,204,113,0.15)",
+                color: "#1a9f55",
+                padding: "1rem 1.5rem",
+                borderRadius: "10px",
+                marginBottom: "1.5rem",
+                fontWeight: 600,
+                fontSize: "1.1rem",
+                textAlign: "center",
+                border: "1px solid rgba(46,204,113,0.3)",
+              }}>
+                {msg}
+              </div>
+            )}
             <span className="hero-eyebrow anim-fade-up">◆ The Modern Marketplace</span>
             <h1 className="hero-title anim-fade-up" style={{ animationDelay: ".1s" }}>
               Buy & Sell<br />

@@ -69,4 +69,11 @@ productSchema.methods.updateAverageRating = function () {
   }
 };
 
+// Indexes for query performance at scale
+productSchema.index({ status: 1, category: 1 });
+productSchema.index({ seller: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ name: "text" });
+productSchema.index({ createdAt: -1 });
+
 export default mongoose.model("Product", productSchema);

@@ -1,6 +1,6 @@
 import express from "express";
 import User from "../models/User.js";
-import { protect } from "../middleware/auth.js";
+import { protect,googleprotect } from "../middleware/auth.js";
 import {createSession} from "../components/session.js";
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
@@ -11,6 +11,7 @@ const router = express.Router();
 //   jwt.sign({ id }, 
 //     process.env.JWT_SECRET, 
 //     { expiresIn: process.env.JWT_EXPIRE || "7d" });
+
 
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
@@ -44,7 +45,8 @@ router.post("/register", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -72,7 +74,8 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 
@@ -85,29 +88,46 @@ router.get('/google', passport.authenticate('google', {
 // Google OAuth callback route
 
 router.get("/google/callback",
-  passport.authenticate("google", {session:false, failureRedirect: "/auth'" }),
-  async(req, res) => {
-    await createSession(res, user._id.toString());
-    res.redirect('http://localhost:3000/shop');
+  passport.authenticate("google", { session: false, failureRedirect: (process.env.CLIENT_URL || "http://localhost:3000") + "/auth" }),
+  async (req, res) => {
+    await createSession(res, req.user._id.toString());
+    res.redirect((process.env.CLIENT_URL || "http://localhost:3000") + "/userinfo");
   }
 )
 
-//get /api/auth/logout
+// POST /api/auth/logout — POST prevents CSRF logout via img tags
 router.get('/logout', protect, async (req, res) => {
   res.clearCookie('token', { path: '/' });
   return res.json({ success: true, message: 'session is deleted' });
 });
-// GET /api/auth/me
-router.get("/me", protect, async (req, res) => {
-  res.json({ success: true, user: req.user });
+
+// backend route
+router.get("/me",googleprotect,(req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ success: false });
+  }
+
+  res.json({
+    success: true,
+    user: {
+      id: req.user._id,
+      name: req.user.name,
+      email: req.user.email,
+      role: req.user.role,
+      avatar: req.user.avatar,
+      authProvider: req.user.authProvider,
+    },
+  });
 });
 
-// PUT /api/auth/profile
+// PUT /api/auth/profile — whitelist allowed fields only
 router.put("/profile", protect, async (req, res) => {
   try {
-    const updates = { ...req.body };
-    delete updates.password;
-    delete updates.role;
+    const allowedFields = ["name", "phone", "avatar", "storeName", "storeDescription"];
+    const updates = {};
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
 
     const user = await User.findByIdAndUpdate(req.user._id, updates, {
       new: true,
@@ -115,7 +135,8 @@ router.put("/profile", protect, async (req, res) => {
     });
     res.json({ success: true, user });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 });
 

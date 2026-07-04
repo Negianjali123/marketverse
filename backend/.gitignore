@@ -1,9 +1,5 @@
 node_modules/
 .env
-build/
-dist/
 uploads/
 *.log
 .DS_Store
-smtpaccesskey.csv
-*.csv

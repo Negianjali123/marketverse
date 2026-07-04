@@ -50,7 +50,7 @@ const Payment = () => {
         setLoading("cod");
         setError("");
         try {
-            const payload = buifdOrderPayload("cod");
+            const payload = buildOrderPayload("cod");
             const { data } = await API.post("/orders", payload);
             if (data.success) {
                 clearCart();
