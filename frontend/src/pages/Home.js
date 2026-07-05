@@ -31,6 +31,7 @@ const Home = () => {
       setTimeout(() => setMsg(""), 5000);
     }
   }, [location.state]);
+
   useEffect(() => {
     const logininfo = async () => {
       try {

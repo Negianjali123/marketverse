@@ -6,4 +6,5 @@ uploads/
 *.log
 .DS_Store
 smtpaccesskey.csv
-*.csv
+*.csv  //*. use to ignore all the files and # use commnet the content of that file
+*.log

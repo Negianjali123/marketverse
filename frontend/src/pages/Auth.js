@@ -26,7 +26,7 @@ const Auth = () => {
     setError("");
     try {
       // const { data } = await API.get("/auth/google");
-      window.location.href = "http://localhost:5000/api/auth/google";
+      window.location.href = `${process.env.REACT_APP_API_URL}/auth/google`;
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong");
     }

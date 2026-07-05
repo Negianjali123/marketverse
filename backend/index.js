@@ -96,7 +96,7 @@ app.get("/api/loginstatus",async(req,res)=>{
 })
 
 // ── Serve React build in production ──
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.send("API is running...");
 });
 
