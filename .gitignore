@@ -1,5 +1,7 @@
 node_modules/
 .env
+# but keep the example template so other devs can copy it
+!.env.example
 build/
 dist/
 uploads/
