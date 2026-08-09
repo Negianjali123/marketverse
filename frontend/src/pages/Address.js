@@ -5,24 +5,42 @@ import { useAddress } from "../context/AddressContext";
 
 const Address = () => {
     const navigate = useNavigate();
-    const { pubaddress, setPubaddress, editing, fetchAddress } = useAddress();
+    const { pubaddress, setPubaddress, editing, fetchAddress,stateinfo } = useAddress();
     const [form, setForm] = useState({ buildingname: "", areaname: "", pincode: "", city: "", state: "" });
     const [loading, setLoading] = useState(false);
     const [msg, setMsg] = useState("");
-
+     const [getcity, setGetcity] = useState([]);
     // Pre-fill form when existing address loads from context
     useEffect(() => {
+
         if (pubaddress) {
             setForm({
+                
                 buildingname: pubaddress.buildingname || "",
                 areaname: pubaddress.areaname || "",
                 pincode: pubaddress.pincode || "",
                 city: pubaddress.city || "",
                 state: pubaddress.state || "",
             });
+            console.log(pubaddress)
         }
     }, [pubaddress]);
 
+    const handleChangeState =async (e)=>{
+        e.preventDefault(e)
+        const stateid=e.target.value
+        setForm({ ...form, [e.target.name]: e.target.value });
+         const res = await API.get(`/address/city/${stateid}`);
+            if (res.data.success && res.data.citydetails) {
+                // console.log(res.data.citydetails)
+                setGetcity(res.data.citydetails);
+               
+            }
+            else{
+                console.log("getting issue")
+            }
+            // setLoading(false);
+    }
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!editing) {
@@ -56,6 +74,7 @@ const Address = () => {
 
     return (
         <>
+      
             <div className="checkout-page container">
                 <h1><span className="highlight">{pubaddress ? "Edit Address" : "Add New Address"}</span></h1>
 
@@ -93,13 +112,40 @@ const Address = () => {
 
                         <div className="form-row">
                             <div className="form-group">
-                                <label>City</label>
-                                <input className="form-input" name="city" value={form.city} onChange={handleChange} />
+                                <label>State</label>
+                                <select
+                                    id="stateid"
+                                    name="state"
+                                    className="form-input"
+                                   value={form.state}
+                                    onChange={handleChangeState}
+                                >
+                                    <option value="">Select State</option>
+                                    {stateinfo.map(({ id, name }) => (
+                                        <option key={id} value={id}>
+                                            {name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
                             <div className="form-group">
-                                <label>State</label>
-                                <input className="form-input" name="state" value={form.state} onChange={handleChange} />
+                                <label>City</label>
+                                <select
+                                    id="cityid"
+                                    name="city"
+                                    value={form.city}
+                                    className="form-input"
+                                    onChange={handleChange}
+                                >
+                                    <option value="">Select City</option>
+                                    {getcity.map(({ id, name }) => (
+                                        <option key={id} value={id}>
+                                            {name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
+                            
                         </div>
 
                         <div style={{ display: "flex", gap: "1rem" }}>

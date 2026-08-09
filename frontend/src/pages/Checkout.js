@@ -173,7 +173,7 @@ const Checkout = () => {
                                     <div className="summary-row">
                                         <p style={{ margin: "0.5rem 0", lineHeight: 1.6 }}>
                                             {pubaddress.buildingname}, {pubaddress.areaname}<br />
-                                            {pubaddress.city} {pubaddress.state} - {pubaddress.pincode}
+                                            {pubaddress.cityName}, {pubaddress.stateName} - {pubaddress.pincode}
                                         </p>
                                     </div>
 

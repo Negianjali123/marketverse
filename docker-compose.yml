@@ -1,0 +1,49 @@
+services:
+  backend:
+    image: marketverse-backend
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    container_name: mern_marketverse-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    restart: unless-stopped
+    depends_on:
+      - redis
+    networks:
+      - marketverse-net
+  frontend:
+    image: marketverse-frontend
+    build: ./frontend
+    env_file:
+      - ./frontend/.env
+    container_name: mern-marketverse-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    networks:
+      - marketverse-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: marketverse-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - marketverse-net
+  
+networks:
+    marketverse-net:
+      driver: bridge
+  
+volumes:
+   redis-data:

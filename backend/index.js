@@ -17,6 +17,7 @@ import orderRoutes from './routes/orders.js';
 import AddressRoutes from './routes/address.js';
 import imageURl from './routes/imageURl.js';
 import {getSession} from "./components/session.js"
+
 // ES module __dirname equivalent
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,7 +30,7 @@ const app = express();
 // ── Security Middleware ──
 app.use(helmet());                                        // security headers
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:3000",  // never "*" with credentials
+  origin: "http://localhost:3000",  // never "*" with credentials
   credentials: true,
 }));
 app.use(express.json({ limit: "1mb" }));                  // reduced from 10mb
@@ -102,7 +103,7 @@ app.get("/api", (req, res) => {
 
 // ── Error handler (never leak internal errors) ──
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  // console.error(err.stack);
   const statusCode = err.statusCode || 500;
   res.status(statusCode).json({
     success: false,
