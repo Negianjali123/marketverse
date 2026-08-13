@@ -64,6 +64,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
+    
       # tell EC2 to pull images
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
