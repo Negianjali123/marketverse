@@ -40,12 +40,10 @@ jobs:
       # push to ECR
       - name: Push backend
         run: |
-          docker push \
-            ${{ steps.login-ecr.outputs.registry }}/marketverse:${{ github.sha }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/marketverse:${{ github.sha }}
       - name: Push frontend
         run: |
-          docker push \
-            ${{ steps.login-ecr.outputs.registry }}/marketverse:${{ github.sha }}
+          docker push ${{ steps.login-ecr.outputs.registry }}/marketverse:${{ github.sha }}
             
   
 
