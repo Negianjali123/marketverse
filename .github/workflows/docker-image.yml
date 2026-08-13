@@ -32,15 +32,11 @@ jobs:
         # this must be automatically produced  ${{ steps.login-ecr.outputs.registry }} by this GitHub Actions step
       - name: Build backend
         run: |
-          docker build \
-            -t ${{ steps.login-ecr.outputs.registry }}/marketverse-backend:${{ github.sha }} \ 
-            ./backend
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/marketverse-backend:${{ github.sha }} ./backend .
 
       - name: Build frontend
         run: |
-          docker build \
-            -t ${{ steps.login-ecr.outputs.registry }}/marketverse-frontend:${{ github.sha }} \
-            ./frontend
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/marketverse-frontend:${{ github.sha }} ./frontend .
       # push to ECR
       - name: Push backend
         run: |
