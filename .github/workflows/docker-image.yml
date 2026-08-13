@@ -1,5 +1,7 @@
 name: Docker Image CI
-
+permissions:
+  id-token: write
+  contents: read
 on:
   push:
     branches: [ "main" ]
@@ -25,12 +27,13 @@ jobs:
           
       - name: Login to ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
-        
+        uses: aws-actions/amazon-ecr-login@v2  
+
+        # this must be automatically produced  ${{ steps.login-ecr.outputs.registry }} by this GitHub Actions step
       - name: Build backend
         run: |
           docker build \
-            -t ${{ steps.login-ecr.outputs.registry }}/marketverse-backend:${{ github.sha }} \
+            -t ${{ steps.login-ecr.outputs.registry }}/marketverse-backend:${{ github.sha }} \ 
             ./backend
 
       - name: Build frontend
@@ -47,6 +50,22 @@ jobs:
         run: |
           docker push \
             ${{ steps.login-ecr.outputs.registry }}/marketverse-frontend:${{ github.sha }}
+            
+  
+
+
+  test-aws:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Check AWS identity
+        run: aws sts get-caller-identity
 
   deploy:
     needs: build-and-push
@@ -56,8 +75,8 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  #new police for ODIC 
+          aws-region: ${{ secrets.AWS_REGION }}  
       # restart containers
       - name: Deploy to EC2
         run: |
