@@ -13,7 +13,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     steps:
-    
+
       # build Docker images
       - name: Checkout code
         uses: actions/checkout@v4
@@ -73,7 +73,11 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  #new police for ODIC 
           aws-region: ${{ secrets.AWS_REGION }} 
-
+      - name: Check SSM instance
+        run: |
+          aws ssm describe-instance-information \
+          --region ap-south-1 \
+          --filters "Key=InstanceIds,Values=i-02ec7b48b88c77487"
       # restart containers
       - name: Deploy to EC2
         run: |
