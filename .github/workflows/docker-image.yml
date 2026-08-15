@@ -66,19 +66,19 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-    
       # tell EC2 to pull images
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  #new police for ODIC 
           aws-region: ${{ secrets.AWS_REGION }} 
+          
       - name: Check SSM instance
         run: |
           aws ssm describe-instance-information \
           --region ap-south-1 \
           --filters "Key=InstanceIds,Values=i-02ec7b48b88c77487"
-          
+
       # restart containers
       - name: Deploy to EC2
         run: |
