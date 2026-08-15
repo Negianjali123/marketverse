@@ -45,6 +45,7 @@ jobs:
         run: |
           docker push \
             ${{ steps.login-ecr.outputs.registry }}/marketverse-backend:${{ github.sha }}
+      
       - name: Push frontend
         run: |
           docker push \
