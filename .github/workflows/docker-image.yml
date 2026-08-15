@@ -39,6 +39,7 @@ jobs:
       - name: Build frontend
         run: |
           docker build -t ${{ steps.login-ecr.outputs.registry }}/marketverse-frontend:${{ github.sha }} ./frontend 
+     
       # push to ECR
       - name: Push backend
         run: |
