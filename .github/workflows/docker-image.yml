@@ -78,6 +78,7 @@ jobs:
           aws ssm describe-instance-information \
           --region ap-south-1 \
           --filters "Key=InstanceIds,Values=i-02ec7b48b88c77487"
+          
       # restart containers
       - name: Deploy to EC2
         run: |
