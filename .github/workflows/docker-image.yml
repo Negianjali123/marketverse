@@ -69,7 +69,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # tell EC2 to pull images
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials Check
         uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}  #new police for ODIC 
