@@ -31,15 +31,25 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2  
 
-        #Build & push BOTH images
-      - name: Build, tag, and push images to ECR
+        # this must be automatically produced  ${{ steps.login-ecr.outputs.registry }} by this GitHub Actions step
+      - name: Build backend
         run: |
-          docker build -t ${{ secrets.ECR_REGISTRY }}/marketverse-backend:${{ github.sha }} ./backend
-          docker push ${{ secrets.ECR_REGISTRY }}/marketverse-backend:${{ github.sha }}
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/marketverse-backend:${{ github.sha }} ./backend 
 
-          docker build -t ${{ secrets.ECR_REGISTRY }}/marketverse-frontend:${{ github.sha }} ./frontend
-          docker push ${{ secrets.ECR_REGISTRY }}/marketverse-frontend:${{ github.sha }}
-
+      - name: Build frontend
+        run: |
+          docker build -t ${{ steps.login-ecr.outputs.registry }}/marketverse-frontend:${{ github.sha }} ./frontend 
+     
+      # push to ECR
+      - name: Push backend
+        run: |
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/marketverse-backend:${{ github.sha }}
+      
+      - name: Push frontend
+        run: |
+          docker push \
+            ${{ steps.login-ecr.outputs.registry }}/marketverse-frontend:${{ github.sha }}
             
   test-aws:
     runs-on: ubuntu-latest
@@ -58,7 +68,7 @@ jobs:
     needs: build-and-push
     runs-on: ubuntu-latest
     steps:
-
+    
       # tell EC2 to pull images
       - name: Configure AWS credentials Check
         uses: aws-actions/configure-aws-credentials@v4
