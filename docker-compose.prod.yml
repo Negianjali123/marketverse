@@ -1,11 +1,9 @@
 services:
   backend:
-    image: ${ECR_REGISTRY}/marketverse-backend:${IMAGE_TAG}
+    image: ${ECR_REGISTRYT}/marketverse-backend:${IMAGE_TAG}
     container_name: mern_marketverse-backend
     ports:
       - "5000:5000"
-    env_file:
-      - ./backend/.env
     restart: unless-stopped
     depends_on:
       - redis
@@ -13,7 +11,7 @@ services:
       - marketverse-net
 
   frontend:
-    image: ${ECR_REGISTRY}/marketverse-frontend:${IMAGE_TAG}
+    image: ${ECR_REGISTRYT}/marketverse-frontend:${IMAGE_TAG}
     container_name: mern-marketverse-frontend
     ports:
       - "3000:80"
