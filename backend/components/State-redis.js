@@ -1,4 +1,4 @@
-import redis from "../Config/redis.js"
+import redis from "../config/redis.js"
 import States from "../Data/Stata.js"
 
 const State = async (req, res,next) => {
