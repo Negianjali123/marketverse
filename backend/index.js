@@ -30,7 +30,7 @@ const app = express();
 // ── Security Middleware ──
 app.use(helmet());                                        // security headers
 app.use(cors({
-  origin: "http://localhost:3000",  // never "*" with credentials
+  origin:  "https://anjalinegi.com",  // never "*" with credentials
   credentials: true,
 }));
 app.use(express.json({ limit: "1mb" }));                  // reduced from 10mb
