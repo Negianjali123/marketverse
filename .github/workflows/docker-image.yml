@@ -86,12 +86,19 @@ jobs:
           aws ssm describe-instance-information \
           --region ap-south-1 \
           --filters "Key=InstanceIds,Values=i-02ec7b48b88c77487"
+
+      # actions/checkout@v4 is a github action which downloads/checks out your GitHub repository's code into the GitHub Actions runner.
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
       - name: Check workspace
         run: |
           pwd
           ls -la
           find . -name "docker-compose.prod.yml" -print
       #  NGINX_CONTENT=$(base64 -w 0 nginx/conf.d/default.conf)
+      
+
       - name: Update docker-compose.prod.yml on EC2
         run: |
           COMPOSE_CONTENT=$(base64 -w 0 docker-compose.prod.yml)
