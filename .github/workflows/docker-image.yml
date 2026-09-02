@@ -90,6 +90,9 @@ jobs:
  #  NGINX_CONTENT=$(base64 -w 0 nginx/conf.d/default.conf)
       - name: Update deployment files on EC2
         run: |
+          pwd
+          ls -la
+          find . -maxdepth 3 -type f | sort
           COMPOSE_CONTENT=$(base64 -w 0 docker-compose.prod.yml) 
      
 
