@@ -86,29 +86,28 @@ jobs:
           aws ssm describe-instance-information \
           --region ap-south-1 \
           --filters "Key=InstanceIds,Values=i-02ec7b48b88c77487"
-
- #  NGINX_CONTENT=$(base64 -w 0 nginx/conf.d/default.conf)
-      - name: Update deployment files on EC2
+      - name: Check workspace
         run: |
           pwd
           ls -la
-          find . -maxdepth 3 -type f | sort
-          COMPOSE_CONTENT=$(base64 -w 0 docker-compose.prod.yml) 
-     
+          find . -name "docker-compose.prod.yml" -print
+      #  NGINX_CONTENT=$(base64 -w 0 nginx/conf.d/default.conf)
+      - name: Update docker-compose.prod.yml on EC2
+        run: |
+          COMPOSE_CONTENT=$(base64 -w 0 docker-compose.prod.yml)
 
           aws ssm send-command \
-            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters commands="[
+            --parameters "commands=[
               \"echo $COMPOSE_CONTENT | base64 -d > /home/ubuntu/marketverse/docker-compose.prod.yml\"
             ]"
+        # restart containers
+        # command-executed :AWS CLI, keep checking this SSM command until it reaches a terminal state.
+        # command-invocation : What is the current status/output of this particular command
 
-      # restart containers
-      # command-executed :AWS CLI, keep checking this SSM command until it reaches a terminal state.
-      # command-invocation : What is the current status/output of this particular command
       - name: Deploy to EC2
         run: |
-        
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
@@ -125,38 +124,38 @@ jobs:
             --query "Command.CommandId" \
             --output text)
 
-          echo "SSM Command ID: $COMMAND_ID"
+            echo "SSM Command ID: $COMMAND_ID"
 
-          echo "Waiting for SSM command to finish..."
-          
-          aws ssm wait command-executed \
-            --command-id "$COMMAND_ID" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
-            --region "${{ secrets.AWS_REGION }}"
-          
-          echo "Getting final SSM result..."
+            echo "Waiting for SSM command to finish..."
+            
+            aws ssm wait command-executed \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+              --region "${{ secrets.AWS_REGION }}"
+            
+            echo "Getting final SSM result..."
 
-          aws ssm get-command-invocation \
-            --command-id "$COMMAND_ID" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
-            --region "${{ secrets.AWS_REGION }}"
-          
-           echo "----- STANDARD OUTPUT -----"
+            aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+              --region "${{ secrets.AWS_REGION }}"
+            
+            echo "----- STANDARD OUTPUT -----"
 
-          aws ssm get-command-invocation \
-            --command-id "$COMMAND_ID" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
-            --region "${{ secrets.AWS_REGION }}" \
-            --query "StandardOutputContent" \
-            --output text
+            aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+              --region "${{ secrets.AWS_REGION }}" \
+              --query "StandardOutputContent" \
+              --output text
 
-          echo "----- STANDARD ERROR -----"
+            echo "----- STANDARD ERROR -----"
 
-          aws ssm get-command-invocation \
-            --command-id "$COMMAND_ID" \
-            --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
-            --region "${{ secrets.AWS_REGION }}" \
-            --query "StandardErrorContent" \
-            --output text
+            aws ssm get-command-invocation \
+              --command-id "$COMMAND_ID" \
+              --instance-id "${{ secrets.EC2_INSTANCE_ID }}" \
+              --region "${{ secrets.AWS_REGION }}" \
+              --query "StandardErrorContent" \
+              --output text
 
           
