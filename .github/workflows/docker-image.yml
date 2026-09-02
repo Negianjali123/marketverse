@@ -87,11 +87,25 @@ jobs:
           --region ap-south-1 \
           --filters "Key=InstanceIds,Values=i-02ec7b48b88c77487"
 
+ #  NGINX_CONTENT=$(base64 -w 0 nginx/conf.d/default.conf)
+      - name: Update deployment files on EC2
+        run: |
+          COMPOSE_CONTENT=$(base64 -w 0 docker-compose.prod.yml) 
+     
+
+          aws ssm send-command \
+            --instance-ids ${{ secrets.EC2_INSTANCE_ID }} \
+            --document-name "AWS-RunShellScript" \
+            --parameters commands="[
+              \"echo $COMPOSE_CONTENT | base64 -d > /home/ubuntu/marketverse/docker-compose.prod.yml\"
+            ]"
+
       # restart containers
       # command-executed :AWS CLI, keep checking this SSM command until it reaches a terminal state.
       # command-invocation : What is the current status/output of this particular command
       - name: Deploy to EC2
         run: |
+        
           COMMAND_ID=$(aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
