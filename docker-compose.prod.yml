@@ -4,8 +4,8 @@ services:
     container_name: mern-marketverse-backend
     env_file:
       - .env
-    expose:
-      - "5000"
+    ports:
+      - "5000:5000"
     restart: unless-stopped
     depends_on:
       - redis
@@ -15,8 +15,8 @@ services:
   frontend:
     image: ${ECR_REGISTRYT}/marketverse-frontend:${IMAGE_TAG}
     container_name: mern-marketverse-frontend
-    expose:
-      - "80"
+    ports:
+      - "3000:80"
     restart: unless-stopped
     networks:
       - marketverse-net
@@ -34,24 +34,6 @@ services:
     networks:
       - marketverse-net
 
-  nginx:
-    image: nginx:alpine
-    container_name: marketverse-nginx
-
-    ports:
-      - "80:80"
-      - "443:443" 
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-
-    depends_on:
-      - frontend
-      - backend
-
-    restart: unless-stopped
-
-    networks:
-      - marketverse-net
 
 networks:
   marketverse-net:
