@@ -1,6 +1,6 @@
 services:
   backend:
-    image: ${ECR_REGISTRYT}/marketverse-backend:${IMAGE_TAG}
+    image: ${ECR_REGISTRY}/marketverse-backend:${IMAGE_TAG}
     container_name: mern-marketverse-backend
     env_file:
       - .env
@@ -13,7 +13,7 @@ services:
       - marketverse-net
 
   frontend:
-    image: ${ECR_REGISTRYT}/marketverse-frontend:${IMAGE_TAG}
+    image: ${ECR_REGISTRY}/marketverse-frontend:${IMAGE_TAG}
     container_name: mern-marketverse-frontend
     ports:
       - "3000:80"
