@@ -109,7 +109,7 @@ jobs:
             --parameters "commands=[
               \"echo $COMPOSE_CONTENT | base64 -d > /home/ubuntu/marketverse/docker-compose.prod.yml\"
             ]"
-            
+
         # restart containers
         # command-executed :AWS CLI, keep checking this SSM command until it reaches a terminal state.
         # command-invocation : What is the current status/output of this particular command
@@ -122,7 +122,7 @@ jobs:
             --parameters 'commands=[
               "set -e",
               "cd /home/ubuntu/marketverse",
-              "export ECR_REGISTRY=${{ secrets.ECR_REGISTRYT }}",
+              "export ECR_REGISTRY=${{ secrets.ECR_REGISTRY }}",
               "export IMAGE_TAG=${{ github.sha }}",
               "aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY",
               "docker compose -f docker-compose.prod.yml pull",
