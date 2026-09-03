@@ -109,6 +109,7 @@ jobs:
             --parameters "commands=[
               \"echo $COMPOSE_CONTENT | base64 -d > /home/ubuntu/marketverse/docker-compose.prod.yml\"
             ]"
+            
         # restart containers
         # command-executed :AWS CLI, keep checking this SSM command until it reaches a terminal state.
         # command-invocation : What is the current status/output of this particular command
