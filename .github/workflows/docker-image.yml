@@ -42,6 +42,7 @@ jobs:
       - name: Build frontend
         run: |
           docker build \
+          --build-arg REACT_APP_API_URL=${{ secrets.REACT_APP_API_URL }} \
           -t ${{ steps.login-ecr.outputs.registry }}/marketverse-frontend:${{ github.sha }} \
            ./frontend 
      
