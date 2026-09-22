@@ -108,7 +108,7 @@ const Checkout = () => {
                         {cart.map((item, i) => (
                             <div className="row" key={item._id} style={{ animationDelay: `${i * 0.06}s` }}>
                                 <div className="col">
-                                    <Link to={`/product/${item._id}`}>
+                                    <Link to={`/products/${item._id}`}>
                                         <img src={item.imageUrl} alt={item.name} loading="lazy" />
                                     </Link>
 
