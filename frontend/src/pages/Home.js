@@ -5,6 +5,7 @@ import ProductCard from "../components/ProductCard";
 import { AuthProvider } from "../context/AuthContext";
 import "./Pages.css";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 
 const CATEGORIES = [
   { name: "Electronics", icon: "⚡", color: "#4a9dec", desc: "Gadgets & Tech" },
@@ -21,7 +22,6 @@ const Home = () => {
   const [products, setProducts] = useState([]);
   const [msg, setMsg] = useState("");
   const location = useLocation();
-  const { user } = useAuth()
   // Show order success message when redirected from Payment
   useEffect(() => {
     if (location.state?.orderMsg) {
@@ -49,7 +49,9 @@ const Home = () => {
     const fetchProducts = async () => {
       try {
         const { data } = await API.get("/products/featured");
-        if (data.products?.length > 0) setProducts(data.products);
+        if (data.products?.length > 0) {
+          setProducts(data.products);
+        }
       } catch {
         // Use demo data
       }
@@ -146,7 +148,7 @@ const Home = () => {
             </Link>
           ))}
         </div>
-      </section>
+      </section> 
 
       {/* ── Featured Products ── */}
       <section className="section products-section container">

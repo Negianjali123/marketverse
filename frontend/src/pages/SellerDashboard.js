@@ -20,7 +20,7 @@ const SellerDashboard = () => {
   const [activeTab, setActiveTab] = useState("products");
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [form, setForm] = useState(emptyProduct);
+  const [form, setForm] = useState( );
   const [editing, setEditing] = useState(null);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState("");

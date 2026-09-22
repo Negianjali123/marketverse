@@ -20,6 +20,7 @@ const Auth = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
     setError("");
   };
+  
   const handleGoogle = async (e) => {
     e.preventDefault();
     // setLoading(true);

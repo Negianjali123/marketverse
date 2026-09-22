@@ -25,7 +25,7 @@ const ProductCard = ({ product, index = 0 }) => {
   return (
     
     <div className="product-card card" style={{ animationDelay: `${index * 0.06}s` }}>
-      <Link to={`/product/${product._id}`} className="product-card-image">
+      <Link to={`/products/${product._id}`} className="product-card-image">
         <img src={product.imageUrl}  alt={product.name} loading="lazy" />
         {discount > 0 && <span className="discount-tag">-{discount}%</span>}
         {product.isFeatured && <span className="featured-tag">★ Featured</span>}

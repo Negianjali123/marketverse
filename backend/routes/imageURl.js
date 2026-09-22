@@ -32,25 +32,6 @@ router.post("/view", async (req, res) => {
       }
     getUrlImages(images);
 
-
-    // const imageUrls = await Promise.all(
-    //   images.map(async (imageName) => {
-    //     const command = new GetObjectCommand({
-    //       Bucket: process.env.AWS_BUCKET_NAME,
-    //       Key: imageName,
-    //     });
-
-    //     const imageUrl = await getSignedUrl(s3, command, {
-    //       expiresIn: 300,
-    //     });
-
-    //     return {
-    //       imageName,
-    //       imageUrl,
-    //     };
-    //   })
-    // );
-
     res.json({
       imageUrl: imageUrls,
     });

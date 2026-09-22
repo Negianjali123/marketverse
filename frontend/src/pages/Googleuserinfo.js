@@ -4,7 +4,7 @@ import { useNavigate} from "react-router-dom";
 
 
 const Googleuserinfo = () => {
-    const { googlesignup,load } = useAuth();
+    const { googlesignup } = useAuth();
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();

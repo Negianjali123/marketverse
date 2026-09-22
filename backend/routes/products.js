@@ -42,6 +42,21 @@ async function productsWithImageUrls(products) {
     })
   );
 }
+async function productImageUrl(particularproduct) {
+  const command = new GetObjectCommand({
+    Bucket: process.env.AWS_BUCKET_NAME,
+    Key: particularproduct.image,
+  });
+  const imageUrl = await getSignedUrl(s3, command, {
+    expiresIn: 300,
+  });
+
+  // console.log(imageUrl)
+  return {
+    ...particularproduct.toObject ? particularproduct.toObject() : particularproduct,
+    imageUrl,
+  };
+}
 async function productsUploadImage(fileDetails) {
   const key = `products/${Date.now()}-${fileDetails.originalname}`;
   const command = new PutObjectCommand({
@@ -108,28 +123,43 @@ router.get("/", async (req, res) => {
     res.status(500).json({ success: false, message: "Server error" });
   }
 });
-router.post("/cartImage",async(req,res)=>{
-  const products=req.body
-  
-   const Product = await productsWithImageUrls(products)
-  //  console.log(imageUrls);
-    //  res.json({
-    //   success: true,
-    //   message:"done "
-    // });
+router.post("/cartImage", async (req, res) => {
+  const products = req.body
+
+  const Product = await productsWithImageUrls(products)
+  res.json({
+    success: true,
+    Product: Product,
+  });
+})
+
+//Get /productid/:id - product details for particular id 
+router.get("/productid/:id", async (req, res) => {
+  try {
+    // console.log(id);debugger;
+    const particularproduct = await Product.findById(req.params.id)
+      .populate("seller", "storeName");
+
+    // console.log(particularproduct); debugger;
+    const productDetail = await productImageUrl(particularproduct)
+    // console.log(productDetail);
     res.json({
       success: true,
-      Product: Product,
+      product: productDetail,
     });
-})
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+});
 // GET /api/products/featured
 router.get("/featured", async (req, res) => {
   try {
     const products = await Product.find({ status: "active" })
-    .populate("seller", "storeName")
-    .sort("-createdAt")
-    .limit(20);
-    
+      .populate("seller", "storeName")
+      .sort("-createdAt")
+      .limit(20);
+
     const productDetails = await productsWithImageUrls(products)
     // console.log(productDetails);
     res.json({
@@ -159,12 +189,12 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /api/products — seller only
-router.post("/", protect, authorize("seller", "admin"),upload.single("image"), async (req, res) => {
+router.post("/", protect, authorize("seller", "admin"), upload.single("image"), async (req, res) => {
   try {
-    
+
     const s3imagekey = await productsUploadImage(req.file)
-   // Build product with all form fields + S3 key
-  
+    // Build product with all form fields + S3 key
+
     const productToSave = {
       ...req.body,
       seller: req.user._id,
@@ -172,9 +202,9 @@ router.post("/", protect, authorize("seller", "admin"),upload.single("image"), a
     };
 
     //save in db
-    const product = await Product.create(productToSave) 
+    const product = await Product.create(productToSave)
 
-    res.status(201).json({ success: true, message:"data is saved" });
+    res.status(201).json({ success: true, message: "data is saved" });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: "Server error" });
@@ -182,11 +212,11 @@ router.post("/", protect, authorize("seller", "admin"),upload.single("image"), a
 });
 
 // PUT /api/products/:id — seller (own) or admin
-router.put("/:id",protect, authorize("seller", "admin"),upload.single("image"), async (req, res) => {
+router.put("/:id", protect, authorize("seller", "admin"), upload.single("image"), async (req, res) => {
   try {
-     
+
     let product = await Product.findById(req.params.id);
-    
+
     if (!product) {
       return res.status(404).json({ success: false, message: "Product not found" });
     }
@@ -194,18 +224,18 @@ router.put("/:id",protect, authorize("seller", "admin"),upload.single("image"), 
       return res.status(403).json({ success: false, message: "Not authorized" });
     }
     const s3imagekey = await productsUploadImage(req.file)
-   // Build product with all form fields + S3 key
-  
+    // Build product with all form fields + S3 key
+
     const productToSave = {
       ...req.body,
       seller: req.user._id,
       image: s3imagekey,           // S3 key stored as image name
     };
-    product = await Product.findByIdAndUpdate(req.params.id,productToSave, {
+    product = await Product.findByIdAndUpdate(req.params.id, productToSave, {
       new: true,
       runValidators: true,
     });
-    res.json({ success: true, message:"product saved" });
+    res.json({ success: true, message: "product saved" });
   } catch (err) {
     console.error(err.message);
     res.status(500).json({ success: false, message: "Server error" });
