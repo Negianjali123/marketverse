@@ -7,40 +7,39 @@ const SeparateSideZoom = ({ width = 600, height = 400 }) => {
   const LENS_SIZE = 140;   // Lens box dimensions (140x140px)
   const ZOOM_LEVEL = 2.5;  // Magnification factor
   const { id } = useParams();
-  const [visibleproduct ,setVisibleproduct] =useState(null)
-  const [discount ,setDiscount] =useState(null)
+  const [visibleproduct, setVisibleproduct] = useState(null)
+  const [discount, setDiscount] = useState(null)
 
- useEffect(() => {
-  const getProduct = async () => {
-    try {
-      const res = await API.get(`/products/productid/${id}`);
-      if(res.data.success)
-      {
-setVisibleproduct(res.data.product);
+  useEffect(() => {
+    const getProduct = async () => {
+      try {
+        const res = await API.get(`/products/productid/${id}`);
+        if (res.data.success) {
+          setVisibleproduct(res.data.product);
+        }
+
+        // }
+      } catch (err) {
+        console.error(err);
       }
-        
-      // }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    };
 
-  getProduct();
-}, [id]);
-useEffect(() => {
-  const getdiscount = async () => {
-    try {
-      const discount = visibleproduct?.comparePrice
-    ? Math.round(((visibleproduct?.comparePrice - visibleproduct?.price) / visibleproduct?.comparePrice) * 100)
-    : 0;
-    setDiscount(discount)
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    getProduct();
+  }, [id]);
+  useEffect(() => {
+    const getdiscount = async () => {
+      try {
+        const discount = visibleproduct?.comparePrice
+          ? Math.round(((visibleproduct?.comparePrice - visibleproduct?.price) / visibleproduct?.comparePrice) * 100)
+          : 0;
+        setDiscount(discount)
+      } catch (err) {
+        console.error(err);
+      }
+    };
 
-  getdiscount();
-}, [visibleproduct]);
+    getdiscount();
+  }, [visibleproduct]);
 
   const imgRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
@@ -80,7 +79,7 @@ useEffect(() => {
     <div className='checkout-page container' style={{ display: 'flex', gap: '20px', padding: "20px" }}>
 
       {/* ---------------- 1. MAIN IMAGE CONTAINER ---------------- */}
-      <div 
+      <div
         style={{
           position: 'relative',
           width: `${width}px`,
@@ -133,7 +132,7 @@ useEffect(() => {
           }}
         >
           <img
-           src={visibleproduct?.imageUrl}
+            src={visibleproduct?.imageUrl}
             alt="Magnified Preview"
             style={{
               position: 'absolute',
@@ -153,15 +152,16 @@ useEffect(() => {
           <h2 className='text-capitalize'>{visibleproduct?.seller.storeName}</h2>
           <span className="-category">{visibleproduct?.category}</span>
           <h3 className="">{visibleproduct?.name}</h3>
-          {(discount > 0|| !discount) && <span className="px-2 fw-bold" style={{ color: "red"
-            }}>-{discount}%</span>}
-           <span className="current-price">{visibleproduct?.price.toLocaleString("en-IN", { style: "currency", currency: "INR" })}</span>
-           <br/>
+          {(discount > 0 || !discount) && <span className="px-2 fw-bold" style={{
+            color: "red"
+          }}>-{discount}%</span>}
+          <span className="current-price">{visibleproduct?.price.toLocaleString("en-IN", { style: "currency", currency: "INR" })}</span>
+          <br />
           <span>M.R.P{visibleproduct?.comparePrice > 0 && (
-            <span className="compare-price price-distance">{visibleproduct?.comparePrice .toLocaleString("en-IN", { style: "currency", currency: "INR" })}</span>
+            <span className="compare-price price-distance">{visibleproduct?.comparePrice.toLocaleString("en-IN", { style: "currency", currency: "INR" })}</span>
           )}</span>
-          <br/>
-          
+          <br />
+
           <br></br>
           <span className="text-capitalize">{visibleproduct?.description}</span>
         </div>

@@ -102,7 +102,7 @@ const Checkout = () => {
                 }}>
                     {error}</p>)}
 
-                <div ></div>
+                {/* <div ></div> */}
                 <div className="row">
                     <div className="col-7">
                         {cart.map((item, i) => (
