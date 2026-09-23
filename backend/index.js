@@ -38,21 +38,29 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(mongoSanitize());                                 // prevents NoSQL injection
 
+// Trust Nginx reverse proxy
+app.set("trust proxy", 1);
+
 // ── Rate Limiting ──
+
 const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,    // 15 minutes
-  max: 200,                     // 200 requests per window
+  windowMs: 15 * 60 * 1000,
+  max: 200,
   message: { success: false, message: "Too many requests, try again later" },
   standardHeaders: true,
   legacyHeaders: false,
 });
+
 app.use("/api", generalLimiter);
 
-// Stricter rate limit on auth routes (prevent brute-force)
+// Stricter rate limit on auth routes 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 20,                      // 20 login/register attempts per 15min
-  message: { success: false, message: "Too many auth attempts, try again after 15 minutes" },
+  max: 20,
+  message: {
+    success: false,
+    message: "Too many auth attempts, try again after 15 minutes",
+  },
   standardHeaders: true,
   legacyHeaders: false,
 });
