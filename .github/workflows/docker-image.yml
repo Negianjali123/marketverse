@@ -132,7 +132,6 @@ jobs:
             --region "${{ secrets.AWS_REGION }}" \
             --query "Command.CommandId" \
             --output text)
-
             echo "SSM Command ID: $COMMAND_ID"
 
             echo "Waiting for SSM command to finish..."

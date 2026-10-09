@@ -7,17 +7,11 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 
 const router = express.Router();
 
-// const generateToken = (id) =>
-//   jwt.sign({ id }, 
-//     process.env.JWT_SECRET, 
-//     { expiresIn: process.env.JWT_EXPIRE || "7d" });
-
-
 // POST /api/auth/register
 router.post("/register", async (req, res) => {
   try {
+    
     const { name, email, password, role, storeName, storeDescription } = req.body;
-
     const exists = await User.findOne({ email });
     if (exists) {
       return res.status(400).json({ success: false, message: "Email already registered" });

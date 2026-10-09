@@ -2,7 +2,6 @@ import express from "express";
 import Product from "../models/Product.js";
 import { protect, authorize } from "../middleware/auth.js";
 import axios from "axios";
-import imageURL from "./imageURl.js"
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { s3 } from "../config/s3.js";
@@ -10,7 +9,7 @@ import multer from "multer";
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },    // 5MB max
+  limits: { fileSize: 5 * 1024 * 1024 },    // 5MB maximageUrl
   fileFilter: (req, file, cb) => {
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (allowed.includes(file.mimetype)) {
@@ -214,7 +213,7 @@ router.post("/", protect, authorize("seller", "admin"), upload.single("image"), 
 // PUT /api/products/:id — seller (own) or admin
 router.put("/:id", protect, authorize("seller", "admin"), upload.single("image"), async (req, res) => {
   try {
-
+console.log(req.params.id)
     let product = await Product.findById(req.params.id);
 
     if (!product) {

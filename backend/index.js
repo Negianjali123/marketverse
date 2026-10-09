@@ -15,7 +15,6 @@ import authRoutes from './routes/auth.js';
 import productRoutes from './routes/products.js';
 import orderRoutes from './routes/orders.js';
 import AddressRoutes from './routes/address.js';
-import imageURl from './routes/imageURl.js';
 import {getSession} from "./components/session.js"
 
 // ES module __dirname equivalent
@@ -83,7 +82,7 @@ app.use(passport.session());
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // ── API Routes ──
-app.use("/api/images", imageURl);
+
 app.use("/api/auth", authLimiter, authRoutes);            // stricter rate limit on auth
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
