@@ -57,7 +57,7 @@ const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 20,
   message: {
-    success: false,
+    success: true,
     message: "Too many auth attempts, try again after 15 minutes",
   },
   standardHeaders: true,
@@ -70,7 +70,7 @@ app.use(session({
   resave: false,
   saveUninitialized: false,
   cookie: {
-    httpOnly: true,
+    httpOnly: false,
     secure: process.env.NODE_ENV === "production",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   },

@@ -17,7 +17,6 @@ const CATEGORIES = [
 ];
 
 
-
 const Home = () => {
   const [products, setProducts] = useState([]);
   const [msg, setMsg] = useState("");
@@ -33,23 +32,11 @@ const Home = () => {
   }, [location.state]);
 
   useEffect(() => {
-    const logininfo = async () => {
-      try {
-        const { data } = await API.get("/loginstatus")
-        // console.log(data);debugger;
-      } catch (err) {
-        if (err.response?.status === 401) {
-          localStorage.removeItem("user");
-        }
-      }
-    }
-    logininfo();
-  }, [])
-  useEffect(() => {
     const fetchProducts = async () => {
       try {
         const { data } = await API.get("/products/featured");
         if (data.products?.length > 0) {
+           console.log("fetacure")
           setProducts(data.products);
         }
       } catch {

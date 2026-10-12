@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-// import { useCart } from "../context/CartContext";
 import { useParams } from 'react-router-dom';
 import API from '../api';
 
@@ -9,10 +8,13 @@ const SeparateSideZoom = ({ width = 600, height = 400 }) => {
   const { id } = useParams();
   const [visibleproduct, setVisibleproduct] = useState(null)
   const [discount, setDiscount] = useState(null)
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+
     const getProduct = async () => {
       try {
+        console.log("api call for product id")
         const res = await API.get(`/products/productid/${id}`);
         if (res.data.success) {
           setVisibleproduct(res.data.product);
@@ -23,21 +25,23 @@ const SeparateSideZoom = ({ width = 600, height = 400 }) => {
         console.error(err);
       }
     };
-
     getProduct();
   }, [id]);
+
   useEffect(() => {
     const getdiscount = async () => {
       try {
+        console.log("visibleproduct",visibleproduct)
         const discount = visibleproduct?.comparePrice
           ? Math.round(((visibleproduct?.comparePrice - visibleproduct?.price) / visibleproduct?.comparePrice) * 100)
           : 0;
         setDiscount(discount)
+        setLoading(false)
       } catch (err) {
+        
         console.error(err);
       }
     };
-
     getdiscount();
   }, [visibleproduct]);
 
@@ -73,7 +77,7 @@ const SeparateSideZoom = ({ width = 600, height = 400 }) => {
     setLensPos({ x: lensX, y: lensY });
 
   };
-
+  if (loading) return <div className="loader" ></div>;
   return (
 
     <div className='checkout-page container' style={{ display: 'flex', gap: '20px', padding: "20px" }}>

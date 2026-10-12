@@ -49,7 +49,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async() => {
-  await API.get("/auth/logout");
+  const data=await API.get("/auth/logout");
     localStorage.removeItem("user");
     setUser(null);
   };

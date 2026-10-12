@@ -29,7 +29,6 @@ export async function decrypt(token) {
 
 // Set session cookie in Express response
 export async function createSession(res,userId) {
-// console.log(userId);
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 days
   
   const sessionToken = await encrypt({ userId,expiresAt });
