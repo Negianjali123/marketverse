@@ -99,7 +99,6 @@ jobs:
           find . -name "docker-compose.prod.yml" -print
       #  NGINX_CONTENT=$(base64 -w 0 nginx/conf.d/default.conf)
       
-
       - name: Update docker-compose.prod.yml on EC2
         run: |
           COMPOSE_CONTENT=$(base64 -w 0 docker-compose.prod.yml)
