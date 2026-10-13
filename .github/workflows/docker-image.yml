@@ -106,12 +106,12 @@ jobs:
           aws ssm send-command \
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
-            --parameters "commands=[
+            --parameters 'commands=[
               "mkdir -p /home/ubuntu/marketverse",
               "chown ubuntu /home/ubuntu/marketverse",
               "echo '$COMPOSE_CONTENT' | base64 -d > /home/ubuntu/marketverse/docker-compose.prod.yml",
               "chown ubuntu /home/ubuntu/marketverse/docker-compose.prod.yml"
-            ]" 
+            ]'
 
         # restart containers
         # command-executed :AWS CLI, keep checking this SSM command until it reaches a terminal state.
