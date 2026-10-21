@@ -2,8 +2,9 @@ services:
   backend:
     image: marketverse-backend
     build: ./backend
-    # env_file:
-    #   - ./backend/.env
+    # once create .env file in backend and allow backen dot use that file then add this line
+    env_file:     
+      - /.env
     container_name: mern_marketverse-backend
     ports:
       - "5000:5000"
