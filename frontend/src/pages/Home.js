@@ -39,8 +39,9 @@ const Home = () => {
            console.log("fetacure")
           setProducts(data.products);
         }
-      } catch {
+      } catch(err) {
         // Use demo data
+        console.error(err);
       }
     };
     fetchProducts();

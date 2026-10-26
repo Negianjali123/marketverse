@@ -20,7 +20,6 @@ const SeparateSideZoom = ({ width = 600, height = 400 }) => {
           setVisibleproduct(res.data.product);
         }
 
-        // }
       } catch (err) {
         console.error(err);
       }

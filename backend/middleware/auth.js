@@ -57,6 +57,7 @@ const googleprotect = async (req, res, next) => {
 const protect = async (req, res, next) => {
   try {
     const session = await getSession(req); // Reads and verifies the session token from cookies
+    
     // console.log("session",session)
 
     if (!session) {
@@ -75,7 +76,6 @@ const protect = async (req, res, next) => {
       req.user = {
         _id: session.userId,
         role: user.role,
-
       };
     }
 

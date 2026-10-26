@@ -160,7 +160,6 @@ router.get("/featured", async (req, res) => {
       .limit(20);
 
     const productDetails = await productsWithImageUrls(products)
-    // console.log(productDetails);
     res.json({
       success: true,
       products: productDetails,
