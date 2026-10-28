@@ -14,7 +14,7 @@ const SeparateSideZoom = ({ width = 600, height = 400 }) => {
 
     const getProduct = async () => {
       try {
-        console.log("api call for product id")
+
         const res = await API.get(`/products/productid/${id}`);
         if (res.data.success) {
           setVisibleproduct(res.data.product);
@@ -30,7 +30,6 @@ const SeparateSideZoom = ({ width = 600, height = 400 }) => {
   useEffect(() => {
     const getdiscount = async () => {
       try {
-        console.log("visibleproduct",visibleproduct)
         const discount = visibleproduct?.comparePrice
           ? Math.round(((visibleproduct?.comparePrice - visibleproduct?.price) / visibleproduct?.comparePrice) * 100)
           : 0;

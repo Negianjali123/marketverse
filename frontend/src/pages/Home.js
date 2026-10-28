@@ -36,7 +36,6 @@ const Home = () => {
       try {
         const { data } = await API.get("/products/featured");
         if (data.products?.length > 0) {
-           console.log("fetacure")
           setProducts(data.products);
         }
       } catch(err) {
